@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}AeroTrackPro - Delay Dashboard{% endblock %}
+{% block content %}
+<!-- Header -->
+<section class="dashboard-header py-4 animate__animated animate__fadeInDown">
+    <div class="container">
+        <h1 class="display-3 fw-bold text-white"><i class="fas fa-chart-line me-2"></i>Delay Dashboard</h1>
+        <p class="lead text-white opacity-75">Analyze European flight delay trends with precision</p>
+    </div>
+</section>
+
+<!-- Dashboard Content -->
+<section class="dashboard-content py-5">
+    <div class="container">
+        <!-- Filter -->
+        <div class="card shadow-lg mb-5 animate__animated animate__fadeIn">
+            <div class="card-header bg-gradient-info text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-sliders-h me-2"></i>Sort Options</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="d-flex align-items-center gap-3">
+                    <select class="form-control form-control-lg shadow-sm flex-grow-1" name="sort_order">
+                        <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>High to Low Delays</option>
+                        <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Low to High Delays</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-check-circle me-2"></i>Apply</button>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% else %}
+        <!-- Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card stat-card shadow-lg animate__animated animate__zoomIn" style="animation-delay: 0.1s;">
+                    <div class="card-body text-center bg-gradient-primary text-white">
+                        <i class="fas fa-plane-slash fa-2x mb-3"></i>
+                        <h3 class="h5 fw-bold">Flights Delayed > 2 Hours</h3>
+                        <p class="display-4 mb-0">{{ total_delayed }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card shadow-lg animate__animated animate__zoomIn" style="animation-delay: 0.2s;">
+                    <div class="card-body text-center bg-gradient-success text-white">
+                        <i class="fas fa-clock fa-2x mb-3"></i>
+                        <h3 class="h5 fw-bold">Average Delay (> 2 Hours)</h3>
+                        <p class="display-4 mb-0">{{ avg_delay }} <small>min</small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card shadow-lg animate__animated animate__zoomIn" style="animation-delay: 0.3s;">
+                    <div class="card-body text-center bg-gradient-danger text-white">
+                        <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                        <h3 class="h5 fw-bold">Worst Airport</h3>
+                        <p class="lead mb-0">{{ worst_airport }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delayed Flights Table -->
+        <div class="card shadow-lg mb-5 animate__animated animate__fadeInUp">
+            <div class="card-header bg-gradient-warning text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Flights Delayed > 2 Hours ({{ delayed_flights|length }})</h2>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Flight</th>
+                                <th>Departure</th>
+                                <th>Arrival</th>
+                                <th>Delay</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flight in delayed_flights %}
+                            <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                <td class="fw-bold">{{ flight.flight_iata }}</td>
+                                <td>{{ flight.dep_airport }}</td>
+                                <td>{{ flight.arr_airport }}</td>
+                                <td><span class="badge bg-danger">{{ flight.delay_minutes }} min</span></td>
+                                <td><span class="badge status-{{ flight.status|lower }}">{{ flight.status|capitalize }}</span></td>
+                                <td>
+                                    <a href="/details/{{ flight.flight_iata }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not delayed_flights %}
+                            <tr><td colspan="6" class="text-center py-4">No flights delayed by more than 2 hours.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card shadow-lg animate__animated animate__fadeInUp">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h2 class="h4 mb-0"><i class="fas fa-chart-bar me-2"></i>Average Delay by Airline</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ bar_div | safe }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-lg animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h2 class="h4 mb-0"><i class="fas fa-chart-pie me-2"></i>Delay Distribution</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ pie_div | safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

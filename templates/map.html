@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}AeroTrackPro - Flight Map{% endblock %}
+{% block content %}
+<!-- Header -->
+<section class="map-header py-4 animate__animated animate__fadeInDown">
+    <div class="container">
+        <h1 class="display-3 fw-bold text-white"><i class="fas fa-globe-europe me-2"></i>Flight Map</h1>
+        <p class="lead text-white opacity-75">Visualize European flight routes in real-time</p>
+    </div>
+</section>
+
+<!-- Filter and Map -->
+<section class="map-content py-5">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="card shadow-lg animate__animated animate__fadeInLeft">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h2 class="h4 mb-0"><i class="fas fa-filter me-2"></i>Controls</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="mb-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Region</label>
+                                <select class="form-control form-control-lg shadow-sm" name="filter_region">
+                                    {% for region in regions %}
+                                    <option value="{{ region }}" {% if filter_region == region %}selected{% endif %}>{{ region }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-sync-alt me-2"></i>Update Map
+                            </button>
+                        </form>
+                        <div class="flight-stats">
+                            <h3 class="h5 fw-bold"><i class="fas fa-plane me-2"></i>Flight Stats</h3>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Total Flights</span>
+                                    <span class="badge bg-primary">{{ flights|length }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Regions Covered</span>
+                                    <span class="badge bg-info">{{ regions|length - 1 }}</span> <!-- Subtract 'All' -->
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Map -->
+            <div class="col-lg-9 col-md-8">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% else %}
+                <div class="card shadow-lg animate__animated animate__fadeInRight">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h2 class="h4 mb-0"><i class="fas fa-map-marked-alt me-2"></i>Live Flight Routes</h2>
+                    </div>
+                    <div class="card-body p-0">
+                        {{ map_html | safe }}
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="legend d-flex gap-3">
+                            <span><i class="fas fa-circle text-primary me-1"></i>Routes</span>
+                            <span><i class="fas fa-map-marker-alt text-info me-1"></i>Airports</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

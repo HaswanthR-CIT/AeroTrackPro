@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}AeroTrackPro - Home{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<section class="hero animate__animated animate__fadeIn">
+    <div class="container text-center text-white py-5">
+        <h1 class="display-3 fw-bold mb-3"><i class="fas fa-plane-departure me-2"></i>Flight Tracker</h1>
+        <p class="lead mb-4">Monitor {{ total_flights }} flights across {{ total_airports }} European airports with precision</p>
+        <form method="POST" class="row g-3 justify-content-center">
+            <div class="col-md-2 col-sm-6">
+                <input type="text" class="form-control form-control-lg shadow-sm" name="search_flight" placeholder="Flight #" value="{{ search_flight }}">
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <select class="form-control form-control-lg shadow-sm" name="filter_dep">
+                    <option value="">Departure</option>
+                    {% for airport in airports %}
+                    <option value="{{ airport }}" {% if filter_dep == airport %}selected{% endif %}>{{ airport }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <select class="form-control form-control-lg shadow-sm" name="filter_arr">
+                    <option value="">Arrival</option>
+                    {% for airport in airports %}
+                    <option value="{{ airport }}" {% if filter_arr == airport %}selected{% endif %}>{{ airport }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <select class="form-control form-control-lg shadow-sm" name="filter_airline">
+                    <option value="">Airline</option>
+                    {% for airline in airlines %}
+                    <option value="{{ airline }}" {% if filter_airline == airline %}selected{% endif %}>{{ airline }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <select class="form-control form-control-lg shadow-sm" name="filter_status">
+                    <option value="">Status</option>
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {% if filter_status == status %}selected{% endif %}>{{ status|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg flex-grow-1"><i class="fas fa-search me-2"></i>Filter</button>
+                <a href="/" class="btn btn-outline-light btn-lg"><i class="fas fa-times"></i></a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Flight List -->
+<section class="flight-list py-5">
+    <div class="container">
+        <div class="card shadow-lg animate__animated animate__fadeInUp">
+            <div class="card-header bg-gradient-primary text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-list-alt me-2"></i>Flights ({{ flights|length }})</h2>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Flight</th>
+                                <th>Departure</th>
+                                <th>Arrival</th>
+                                <th>Scheduled</th>
+                                <th>Status</th>
+                                <th>Delay</th>
+                                <th>Airline</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flight in flights %}
+                            <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                <td class="fw-bold">{{ flight.flight_iata }}</td>
+                                <td>{{ flight.dep_airport }}</td>
+                                <td>{{ flight.arr_airport }}</td>
+                                <td>{{ flight.scheduled_departure }}</td>
+                                <td>
+                                    <span class="badge status-{{ flight.status|lower }}">
+                                        {{ flight.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if flight.delay_minutes > 0 %}
+                                        <span class="badge bg-warning text-dark">{{ flight.delay_minutes }} min</span>
+                                    {% else %}
+                                        <span class="badge bg-success">On Time</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ flight.airline }}</td>
+                                <td>
+                                    <a href="/details/{{ flight.flight_iata }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not flights %}
+                            <tr><td colspan="8" class="text-center py-4">No flights match your filters.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

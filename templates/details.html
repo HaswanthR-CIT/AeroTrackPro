@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}AeroTrackPro - Flight {{ flight.flight_iata if flight else "Details" }}{% endblock %}
+{% block content %}
+<!-- Header -->
+<section class="details-header py-4 animate__animated animate__fadeInDown">
+    <div class="container">
+        <h1 class="display-3 fw-bold text-white"><i class="fas fa-plane me-2"></i>Flight Details</h1>
+        <p class="lead text-white opacity-75">In-depth insights for European flight {{ flight.flight_iata if flight else "" }}</p>
+    </div>
+</section>
+
+<!-- Details Content -->
+<section class="details-content py-5">
+    <div class="container">
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% elif flight %}
+        <div class="row g-4">
+            <!-- Flight Info -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg animate__animated animate__fadeInLeft">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h2 class="h3 mb-0">{{ flight.flight_iata }} <small class="fw-normal opacity-75">({{ flight.airline }})</small></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="flight-details">
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-plane-departure fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Departure</h4>
+                                    <p>{{ flight.dep_airport }} ({{ flight.dep_iata }})<br>{{ flight.dep_city }}, {{ flight.dep_country }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-plane-arrival fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Arrival</h4>
+                                    <p>{{ flight.arr_airport }} ({{ flight.arr_iata }})<br>{{ flight.arr_city }}, {{ flight.arr_country }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-calendar-alt fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Scheduled</h4>
+                                    <p>Dep: {{ flight.scheduled_departure }}<br>Arr: {{ flight.scheduled_arrival }}</p>
+                                </div>
+                            </div>
+                            {% if flight.actual_departure or flight.actual_arrival %}
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-clock fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Actual</h4>
+                                    <p>Dep: {{ flight.actual_departure or "N/A" }}<br>Arr: {{ flight.actual_arrival or "N/A" }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-info-circle fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Status</h4>
+                                    <p>
+                                        <span class="badge status-{{ flight.status|lower }}">{{ flight.status|capitalize }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-hourglass-half fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Delay</h4>
+                                    <p>
+                                        {% if flight.delay_minutes > 120 %}
+                                            <span class="badge bg-danger">{{ flight.delay_minutes }} min</span>
+                                        {% elif flight.delay_minutes > 0 %}
+                                            <span class="badge bg-warning text-dark">{{ flight.delay_minutes }} min</span>
+                                        {% else %}
+                                            <span class="badge bg-success">On Time</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-door-open fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Gates</h4>
+                                    <p>Dep: {{ flight.departure_gate }}<br>Arr: {{ flight.arrival_gate }}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item d-flex align-items-start mb-3">
+                                <i class="fas fa-plane fa-2x me-3 text-primary"></i>
+                                <div>
+                                    <h4 class="h6 fw-bold">Aircraft</h4>
+                                    <p>{{ flight.aircraft_type }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Progress Bar -->
+                        {% set progress = 0 if flight.status == 'scheduled' else 50 if flight.status == 'active' else 100 if flight.status == 'landed' else 0 %}
+                        <div class="progress mt-4" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated {% if flight.status == 'active' %}bg-success{% elif flight.status == 'landed' %}bg-secondary{% endif %}" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ flight.status|capitalize }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-end">
+                        <a href="/" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Map -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg animate__animated animate__fadeInRight">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h2 class="h4 mb-0"><i class="fas fa-map-marked-alt me-2"></i>Flight Route</h2>
+                    </div>
+                    <div class="card-body p-0">
+                        {{ map_html | safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
